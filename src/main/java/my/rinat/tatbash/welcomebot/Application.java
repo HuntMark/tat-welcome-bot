@@ -1,4 +1,4 @@
-package my.rinat.tatbash.welcome;
+package my.rinat.tatbash.welcomebot;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

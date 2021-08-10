@@ -1,4 +1,4 @@
-package my.rinat.tatbash.welcome.infrastructure.config;
+package my.rinat.tatbash.welcomebot.infrastructure.config;
 
 import lombok.Getter;
 import lombok.Setter;
