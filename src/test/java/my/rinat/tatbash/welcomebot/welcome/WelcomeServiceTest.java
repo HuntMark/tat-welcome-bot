@@ -1,10 +1,10 @@
 package my.rinat.tatbash.welcomebot.welcome;
 
+import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import my.rinat.tatbash.welcomebot.infrastructure.config.AppConfig;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -12,6 +12,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.telegram.telegrambots.meta.api.objects.Message;
+import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.User;
 
 @ExtendWith(MockitoExtension.class)
@@ -26,20 +27,21 @@ class WelcomeServiceTest {
   @Test
   void shouldBeNullSafe() {
     // given:
-    final var message = new Message();
+    final var update = new Update();
+    update.setMessage(new Message());
 
     // when:
-    message.setText(null);
-    message.setNewChatMembers(new ArrayList<>());
+    update.getMessage().setText(null);
+    update.getMessage().setNewChatMembers(new ArrayList<>());
 
     // then:
-    assertThat(service.hasResponse(message)).isFalse();
+    assertThat(service.hasResponse(update)).isFalse();
 
     // when:
-    message.setNewChatMembers(null);
+    update.getMessage().setNewChatMembers(null);
 
     // then:
-    assertThat(service.hasResponse(message)).isFalse();
+    assertThat(service.hasResponse(update)).isFalse();
 
     // when message is null, then:
     assertThat(service.hasResponse(null)).isFalse();
@@ -48,38 +50,41 @@ class WelcomeServiceTest {
   @Test
   void shouldReturnTrueWhenContainsSignalWord() {
     // given:
-    final var message = new Message();
+    final var update = new Update();
+    update.setMessage(new Message());
     when(config.getKeyWord()).thenReturn("example");
 
     // when:
-    message.setText("example");
+    update.getMessage().setText("example");
 
     // then:
-    assertThat(service.hasResponse(message)).isTrue();
+    assertThat(service.hasResponse(update)).isTrue();
   }
 
   @Test
   void shouldReturnTrueWhenNewMembersExist() {
     // given:
-    final var message = new Message();
+    final var update = new Update();
+    update.setMessage(new Message());
 
     // when:
-    message.setNewChatMembers(Collections.singletonList(new User()));
+    update.getMessage().setNewChatMembers(singletonList(new User()));
 
     // then:
-    assertThat(service.hasResponse(message)).isTrue();
+    assertThat(service.hasResponse(update)).isTrue();
   }
 
   @Test
   void shouldReturnFalseWhenDoesNotContainSignalWordOrAnyNewMember() {
     // given:
-    final var message = new Message();
+    final var update = new Update();
+    update.setMessage(new Message());
     when(config.getKeyWord()).thenReturn("example");
 
     // when:
-    message.setText("no key word");
+    update.getMessage().setText("no key word");
 
     // then:
-    assertThat(service.hasResponse(message)).isFalse();
+    assertThat(service.hasResponse(update)).isFalse();
   }
 }

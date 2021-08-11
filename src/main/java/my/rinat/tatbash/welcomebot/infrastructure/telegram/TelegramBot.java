@@ -25,7 +25,7 @@ public class TelegramBot extends TelegramLongPollingBot {
   @Override
   @SneakyThrows(TelegramApiException.class)
   public void onUpdateReceived(Update update) {
-    if (update.hasMessage() && service.hasResponse(update.getMessage())) {
+    if ((update.hasMessage() || update.hasEditedMessage()) && service.hasResponse(update)) {
       execute(service.response(update));
     }
   }

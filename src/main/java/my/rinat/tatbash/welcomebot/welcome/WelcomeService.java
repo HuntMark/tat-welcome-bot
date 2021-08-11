@@ -18,7 +18,14 @@ public class WelcomeService {
 
   private final AppConfig config;
 
-  public boolean hasResponse(Message message) {
+  public boolean hasResponse(Update update) {
+    if (update == null) {
+      return false;
+    }
+    Message message = update.getMessage();
+    if (message == null) {
+      message = update.getEditedMessage();
+    }
     if (message == null) {
       return false;
     }
@@ -27,8 +34,13 @@ public class WelcomeService {
 
   public SendMessage response(Update update) {
     SendMessage response = new SendMessage();
-    response.setChatId(update.getMessage().getChatId().toString());
+    Message message = update.getMessage();
+    if (message == null) {
+      message = update.getEditedMessage();
+    }
+    response.setChatId(message.getChatId().toString());
     response.setText("Hello World!");
+    response.setReplyToMessageId(message.getMessageId());
     return response;
   }
 }
