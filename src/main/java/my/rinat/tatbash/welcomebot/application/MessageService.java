@@ -1,12 +1,12 @@
-package my.rinat.tatbash.welcomebot.welcome;
+package my.rinat.tatbash.welcomebot.application;
 
-import static org.apache.commons.lang3.StringUtils.containsIgnoreCase;
-import static org.springframework.util.CollectionUtils.isEmpty;
-
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import my.rinat.tatbash.welcomebot.infrastructure.config.AppConfig;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -14,30 +14,30 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 @Slf4j
 @RequiredArgsConstructor
 @Service
-public class WelcomeService {
+public class MessageService {
 
   private final AppConfig config;
 
-  public boolean hasResponse(Update update) {
-    if (update == null) {
-      return false;
-    }
-    Message message = update.getMessage();
-    if (message == null) {
-      message = update.getEditedMessage();
-    }
+  public boolean hasKeyWord(Message message) {
     if (message == null) {
       return false;
     }
-    return containsIgnoreCase(message.getText(), config.getKeyWord()) || !isEmpty(message.getNewChatMembers());
+    return StringUtils.containsIgnoreCase(message.getText(), config.getKeyWord());
   }
 
-  public SendMessage response(Update update) {
-    SendMessage response = new SendMessage();
-    Message message = update.getMessage();
+  public boolean hasNewChatMembers(Message message) {
     if (message == null) {
-      message = update.getEditedMessage();
+      return false;
     }
+    return !CollectionUtils.isEmpty(message.getNewChatMembers());
+  }
+
+  public Message extractMessage(Update update) {
+    return Optional.ofNullable(update.getMessage()).orElse(update.getEditedMessage());
+  }
+
+  public SendMessage response(Message message) {
+    SendMessage response = new SendMessage();
     response.setChatId(message.getChatId().toString());
     response.setText("Hello World!");
     response.setReplyToMessageId(message.getMessageId());

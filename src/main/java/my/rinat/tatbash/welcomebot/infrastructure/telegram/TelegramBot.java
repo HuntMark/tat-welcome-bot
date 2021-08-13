@@ -4,8 +4,8 @@ import javax.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import my.rinat.tatbash.welcomebot.application.MessageService;
 import my.rinat.tatbash.welcomebot.infrastructure.config.TelegramBotProperties;
-import my.rinat.tatbash.welcomebot.welcome.WelcomeService;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
@@ -20,19 +20,29 @@ import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 public class TelegramBot extends TelegramLongPollingBot {
 
   private final TelegramBotProperties properties;
-  private final WelcomeService service;
+  private final MessageService service;
 
   @Override
   @SneakyThrows(TelegramApiException.class)
   public void onUpdateReceived(Update update) {
-    if ((update.hasMessage() || update.hasEditedMessage()) && service.hasResponse(update)) {
-      execute(service.response(update));
+    if (isMessageCreatedOrUpdated(update) && isResponseRequired(update)) {
+      execute(service.response(service.extractMessage(update)));
     }
+  }
+
+  private boolean isMessageCreatedOrUpdated(Update update) {
+    return update.hasMessage() || update.hasEditedMessage();
+  }
+
+  private boolean isResponseRequired(Update update) {
+    return service.hasKeyWord(update.getMessage())
+        || service.hasKeyWord(update.getEditedMessage())
+        || service.hasNewChatMembers(update.getMessage());
   }
 
   @PostConstruct
   @SneakyThrows({TelegramApiRequestException.class, TelegramApiException.class})
-  public void selfRegister() {
+  public void registerBot() {
     new TelegramBotsApi(DefaultBotSession.class).registerBot(this);
   }
 
